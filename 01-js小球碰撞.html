@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .layout{
+            width: 800px;
+            height: 600px;
+            border: 1px solid blue;
+            margin:100px auto;
+            position: relative;
+        }
+
+        .ball{
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: red;
+            background-image:radial-gradient(at 5px 5px,rgba(0,0,0,0),rgba(0,0,0,0.5));
+            position : absolute;
+            left:100px;
+            top:400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <p class="ball"></p>
+    </div>
+</body>
+
+<script>
+    /*
+    * 4*10 个盒子   总宽度：800   盒子高:50;    *
+    *
+    * 小球动起来，碰撞检测
+    * */
+
+//     动态生成盒子每个黑字的宽高
+    var  ws=[[],[],[],[]];
+
+    var  boxs=[[],[],[],[]];
+//   列数
+    var col=8;
+//    行数
+    var row=4;
+    var H=50;
+
+   var colors=['pink','yellow','#00ff66','green','red'];
+
+//    box对象
+    function box(row,col,w,x,y){
+        this.row=row;
+        this.col=col;
+        this.height=H;
+        this.width=w;
+        this.x=x;
+        this.y=y;
+        this.show=true;
+        this.bgc=parseInt(Math.random()*5);
+
+        //碰撞检测
+        this.impactTest=function(aimX,aimY){
+            if(this.show){
+                if(aimX>=this.x&&aimX<=this.x+this.width&&aimY>=this.y&&aimY<=this.y+this.height){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+
+
+
+        }
+
+        this.draw=function(){
+                var section= document.createElement('div');
+                section.style.width=this.width+'px';
+                section.style.height=this.height+'px';
+                section.style.backgroundColor=colors[this.bgc];
+                section.style.position="absolute";
+                section.style.left=this.x+'px';
+                section.style.top=this.y+'px';section.style.webkitBoxSizing="border-box";
+                section.style.border="1px solid blue";
+                document.querySelector('.layout').appendChild(section);
+        }
+    }
+
+//    随机生成前4个
+    for(var i=0;i<row;i++){
+        for(var j=0;j<col/2;j++){
+            ws[i][j]=50+parseInt(Math.random()*100);
+        }
+    }
+//    生成匹配的后4个
+    for(var i=0;i<row;i++){
+        for(var j=col/2;j<col;j++){
+            ws[i][j]=200-ws[i][j-col/2];
+        }
+    }
+
+    console.log(ws);
+    var sumWdith=0;
+    var sumHeigth=0;
+//    生成盒子对象数组
+    for(var i=0;i<row;i++){
+        for(var j=0;j<col;j++){
+//            累加宽
+            sumWdith+=ws[i][j];
+            sumHeigth=i*50;
+            var temp=new box(i,j,ws[i][j],sumWdith-ws[i][j],sumHeigth)
+            boxs[i][j]=temp;
+        }
+        sumWdith=0;
+    }
+
+
+// 绘制
+    for(var i=0;i<row;i++){
+        for(var j=0;j<col;j++) {
+            boxs[i][j].draw();
+        }
+     }
+
+//   小球位移
+    var ball=document.querySelector('.ball');
+    var x=ball.offsetLeft;
+    var y=ball.offsetTop;
+
+    var stepx=-5;
+    var stepy=-5;
+    setInterval(function(){
+        x=x+stepx;
+        y=y+stepy;
+
+        if(x<=0){
+            stepx=5;
+        }
+
+        if(x>800-25){
+            stepx=-6;
+        }
+        if(y>600-25){
+           stepy=-7;
+        }
+
+        if(y<=0){
+            stepy=5;
+        }
+
+        for(var i=0;i<row;i++){
+            for(var j=0;j<col;j++){
+                if(boxs[i][j].impactTest(x,y)){
+                    stepy=3;
+                    boxs[i][j].show=false;
+                    document.querySelectorAll('.layout div')[(i)*8+j].style.display='none';
+                }
+            }
+        }
+
+
+
+        ball.style.left=x+'px';
+        ball.style.top=y+'px';
+    },10);
+
+
+</script>
+</html>
